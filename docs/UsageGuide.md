@@ -1,18 +1,14 @@
 # Named Blueprint Links
 
-By **Frainkey** · Beta 0.1.0 · Windows · Unreal Engine 5.8 (tested on 5.8.3)
+By **Frainkey** · Beta 0.1.0-beta.3 · Windows · Unreal Engine 5.8 (tested on 5.8.3)
 
 Replace long Blueprint wires with named Declaration and Usage endpoints. A universal pair handles supported data types and execution connections. Names identify signals; double-clicking a Usage returns you to its Declaration.
 
 ## Installation
 
-### Through Fab / Epic Games Launcher
+### From this source package
 
-When this product becomes available through Fab, install the plugin for the matching Unreal Engine version using the offered Epic installation flow. Open the project, find **Named Blueprint Links** under **Edit → Plugins**, enable it and restart if prompted.
-
-### From a source package
-
-If you receive a source-only package, it contains no precompiled binaries. A matching Unreal C++ build toolchain is required. Close the editor and copy the entire `NamedBlueprintLinks` folder into your project's `Plugins` folder. The descriptor must be at `YourProject/Plugins/NamedBlueprintLinks/NamedBlueprintLinks.uplugin`. Open/build the project with the matching Unreal Engine toolchain, then enable the plugin under Edit → Plugins. If Unreal cannot rebuild it automatically, build the project's Editor target through your IDE or Unreal's plugin build tools.
+This repository contains source, not precompiled binaries. Download the repository ZIP using **Code → Download ZIP**, extract it, and rename the extracted plugin folder to `NamedBlueprintLinks`. A matching Unreal C++ build toolchain is required. Close the editor and copy the entire `NamedBlueprintLinks` folder into your project's `Plugins` folder. The descriptor must be at `YourProject/Plugins/NamedBlueprintLinks/NamedBlueprintLinks.uplugin`. Open/build the project with the matching Unreal Engine toolchain, then enable the plugin under Edit → Plugins. If Unreal cannot rebuild it automatically, build the project's Editor target through your IDE or Unreal's plugin build tools.
 
 Keep a backup before adopting the plugin in an existing project.
 
@@ -61,4 +57,16 @@ For missing links, inspect the Declaration and Usage in the same graph and follo
 
 When reporting a problem, include engine version, platform, exact error text, reproduction steps, and a small graph screenshot. Avoid sharing private project files unless requested through the publisher's support channel.
 
-Functions under **NBL Tests** are internal uncooked fixtures, not game features. Do not place them in project assets.
+Internal test fixture functions are hidden from normal Blueprint authoring. They belong to the uncooked test module and must not be used in game assets.
+
+## License and support policy
+
+The original plugin code is available under the [MIT License](https://github.com/frainkey1/NamedBlueprintLinks/blob/main/LICENSE). Unreal Engine is a separate prerequisite governed by Epic’s terms; this repository does not distribute engine source or grant rights to Unreal Engine.
+
+Maintenance and support are provided voluntarily as time permits. There are no guaranteed response times, fixes, future engine updates, or service levels. Contributions and reproducible issue reports are welcome. Review the MIT warranty and liability disclaimer.
+
+## Development checks
+
+On a machine with a C++17 compiler and Bash, run `bash Tests/run-local.sh` for the portable route-planner checks. This does not build Unreal or establish Linux support. On Windows with a matching Unreal build toolchain, `Scripts/BuildPlugin.ps1` builds the plugin; supply `-EngineRoot` for your local engine installation and a new `-OutputPath`. Unreal automation tests use the `NamedBlueprintLinks` test prefix.
+
+Developed with AI assistance; the UDU plugin icon is generated artwork.

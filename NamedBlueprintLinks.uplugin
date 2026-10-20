@@ -1,0 +1,34 @@
+{
+  "FileVersion": 3,
+  "Version": 3,
+  "VersionName": "0.1.0-beta.3",
+  "FriendlyName": "Named Blueprint Links",
+  "Description": "Named Blueprint data and execution links. Beta; tested cases on Windows UE 5.8.3. See docs/Validation.md for scope.",
+  "Category": "Blueprint",
+  "CreatedBy": "Frainkey",
+  "CanContainContent": false,
+  "EnabledByDefault": false,
+  "IsBetaVersion": true,
+  "Modules": [
+    {
+      "Name": "NamedBlueprintLinksNodes",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "PreDefault",
+      "PlatformAllowList": [
+        "Win64"
+      ]
+    },
+    {
+      "Name": "NamedBlueprintLinksEditor",
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit",
+      "PlatformAllowList": [
+        "Win64"
+      ]
+    }
+  ],
+  "CreatedByURL": "https://github.com/frainkey1",
+  "DocsURL": "https://github.com/frainkey1/NamedBlueprintLinks/blob/main/docs/UsageGuide.md",
+  "SupportURL": "https://github.com/frainkey1/NamedBlueprintLinks/issues",
+  "EngineVersion": "5.8.0"
+}
