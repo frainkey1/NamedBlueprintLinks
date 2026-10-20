@@ -4,6 +4,26 @@ By **Frainkey** · Beta 0.1.0-beta.3 · Windows · Unreal Engine 5.8 (tested on 
 
 Replace long Blueprint wires with named Declaration and Usage endpoints. A universal pair handles supported data types and execution connections. Names identify signals; double-clicking a Usage returns you to its Declaration.
 
+## Screenshots
+
+### Before: long connections across the graph
+
+![Level Blueprint with long data and execution wires before using named links](docs/images/before_named_links.png)
+
+### After: compact typed links near their consumers
+
+![Level Blueprint using colored named data links and white execution links, with a gray wildcard pair](docs/images/after_named_links.png)
+
+The gray pair illustrates an unresolved wildcard. Connected data links adopt their signal's type and color; white arrows carry execution. Give Declarations descriptive names for your own graphs.
+
+### Find a Declaration
+
+![Blueprint action search showing Named Link Declaration](docs/images/find_declaration.png)
+
+### Create its linked Usage
+
+![Declaration context menu with Create Linked Usage selected](docs/images/create_linked_usage.png)
+
 ## Installation
 
 ### From this source package
