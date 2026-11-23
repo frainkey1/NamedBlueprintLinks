@@ -1,7 +1,7 @@
 // Copyright (c) 2026 Frainkey. Licensed under the MIT License.
 
 #pragma once
-#include "K2Node.h"
+#include "K2Node_Knot.h"
 #include "K2Node_NBLBase.generated.h"
 
 UCLASS(Abstract)
@@ -11,12 +11,16 @@ class NAMEDBLUEPRINTLINKSNODES_API UK2Node_NBLBase : public UK2Node
 public:
     UPROPERTY(VisibleAnywhere, Category="Named Link")
     FName LinkName = TEXT("NamedLink");
+    // True only while a Declaration uses its generated fallback name.
+    UPROPERTY()
+    bool bUsesDefaultLinkName = false;
     UPROPERTY(VisibleAnywhere, Category="Named Link")
     FGuid DeclarationId;
     UPROPERTY(EditAnywhere, Category="Named Link")
     FGuid TargetDeclarationId;
     UPROPERTY(Transient)
     bool bCompilerResolved = false;
+    void RefreshPoseLinkBridge();
 
     UPROPERTY()
     bool bUniversalExecution = false;
@@ -32,6 +36,7 @@ public:
     virtual void AllocateDefaultPins() override;
     virtual void PostPlacedNewNode() override;
     virtual void NotifyPinConnectionListChanged(UEdGraphPin* Pin) override;
+    virtual UEdGraphPin* GetPassThroughPin(const UEdGraphPin* FromPin) const override;
     virtual void PostReconstructNode() override;
     virtual bool GetCanRenameNode() const override { return IsDeclaration(); }
     virtual TSharedPtr<INameValidatorInterface> MakeNameValidator() const override;

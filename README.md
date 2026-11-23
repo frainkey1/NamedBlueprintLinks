@@ -1,92 +1,90 @@
 # Named Blueprint Links
 
-By **Frainkey** · Beta 0.1.0-beta.3 · Windows · Unreal Engine 5.8 (tested on 5.8.3)
+By **Frainkey** · Stable 1.0.1 · Windows x64 · Unreal Engine 5.0–5.8 and 5.9 Preview 2
 
-Replace long Blueprint wires with named Declaration and Usage endpoints. A universal pair handles supported data types and execution connections. Names identify signals; double-clicking a Usage returns you to its Declaration.
+Named Blueprint Links replaces long Blueprint connections with named Declaration and Usage endpoints. A Declaration defines a signal; linked Usage nodes carry it near the nodes that consume it. Double-click a Usage to find its Declaration.
+
+## What’s new in 1.0.1
+
+- AnimGraph pose connections display a white pulse when the link is stale.
+- Event Graph execution connections retain Unreal’s native red/orange pulse.
+- Copying a complete Declaration/Usage pair creates fresh identity and remaps its Usages. Custom names, including names such as `Phase 2` and `Phase_2`, stay exactly as entered. Generated names use the compact sequence `Link`, `Link1`, `Link2`, and so on.
+- Win64 packages are provided for Unreal Engine 5.0–5.8 and Unreal Engine 5.9 Preview 2. The 5.9 build remains a Preview 2 build.
 
 ## Screenshots
 
-### Before: long connections across the graph
+### AnimGraph pose links
 
-![Level Blueprint with long data and execution wires before using named links](docs/images/before_named_links.png)
+![Animation Blueprint AnimGraph with white pose-link pulses and named arm groups](docs/images/animgraph_pose_links.png)
 
-### After: compact typed links near their consumers
+The white pulse marks pose-link flow through the AnimGraph.
 
-![Level Blueprint using colored named data links and white execution links, with a gray wildcard pair](docs/images/after_named_links.png)
+### Event Graph execution links
 
-The gray pair illustrates an unresolved wildcard. Connected data links adopt their signal's type and color; white arrows carry execution. Give Declarations descriptive names for your own graphs.
+![Animation Blueprint Event Graph with Unreal red-orange execution pulses through a named link](docs/images/unarmed_eventgraph_pulses.png)
 
-### Find a Declaration
+The Event Graph keeps Unreal’s native execution-wire pulse color.
 
-![Blueprint action search showing Named Link Declaration](docs/images/find_declaration.png)
+## Download and install
 
-### Create its linked Usage
+Choose the ZIP matching your Unreal Engine version from the [GitHub Releases](https://github.com/frainkey1/NamedBlueprintLinks/releases) page:
 
-![Declaration context menu with Create Linked Usage selected](docs/images/create_linked_usage.png)
+- UE 5.0–5.8: `NBLv.1.0.1UE5.x.zip`, with the exact engine number in place of `x` (for example, `NBLv.1.0.1UE5.8.zip`).
+- UE 5.9 Preview 2: `NBLv.1.0.1UE5.9P2.zip`.
 
-## Installation
+Extract the ZIP into your project’s `Plugins` folder. Keep the top-level folder name from the archive. For example:
 
-### From this source package
+```
+YourProject/Plugins/NBLv.1.0.1UE5.8/NamedBlueprintLinks.uplugin
+```
 
-This repository contains source, not precompiled binaries. Download the repository ZIP using **Code → Download ZIP**, extract it, and rename the extracted plugin folder to `NamedBlueprintLinks`. A matching Unreal C++ build toolchain is required. Close the editor and copy the entire `NamedBlueprintLinks` folder into your project's `Plugins` folder. The descriptor must be at `YourProject/Plugins/NamedBlueprintLinks/NamedBlueprintLinks.uplugin`. Open/build the project with the matching Unreal Engine toolchain, then enable the plugin under Edit → Plugins. If Unreal cannot rebuild it automatically, build the project's Editor target through your IDE or Unreal's plugin build tools.
+Close and reopen the project, enable **Named Blueprint Links** under **Edit → Plugins**, and let the matching engine compile the plugin if prompted. The release ZIPs are built for Win64 with their matching Unreal Engine installation. Each ZIP is the official installable source-and-binary copy for that engine version; see [Compatibility/DeveloperNotes.md](Compatibility/DeveloperNotes.md) for version-specific source and dependency notes.
 
 Keep a backup before adopting the plugin in an existing project.
 
-## First named connection
+## Create a named connection
 
-1. Open a supported Blueprint Event Graph or function.
-2. Search the graph action menu for the Named Blueprint Links Declaration.
-3. Connect the source to the Declaration's input; its type/color follows the connected signal.
-4. Rename the Declaration, for example `MoonPosition` or `CanInteract`.
+1. Open a supported Blueprint Event Graph, function graph, or Animation Blueprint graph.
+2. Search the graph action menu for **Named Link Declaration**.
+3. Connect a data source to the Declaration input, or place the link along an execution or pose connection.
+4. Rename the Declaration to describe the signal.
 5. Right-click the Declaration and choose **Create Linked Usage**.
 6. Move the Usage near its consumer and connect its output.
-7. Compile and test the Blueprint. Double-click the Usage to navigate to the Declaration.
+7. Compile and test the Blueprint. Double-click the Usage to navigate back to its Declaration.
 
-Data permits multiple Usages and a local Declaration output. Execution permits one linked Usage and has no usable local Declaration output. Gray indicates an unresolved wildcard; white arrows indicate execution. Pin fill describes physical wires attached to that pin, not the invisible association.
+Data Declarations allow multiple Usages and a local Declaration output. Execution Declarations allow one linked Usage. Named pose links carry AnimGraph poses. The Declaration and its Usages associate by identity, not by matching labels.
 
-## Rename, copy, delete and recover
+## Copy, rename, and recovery
 
-Rename the Declaration; linked Usage labels update together. Associations use identity, not just matching text. A Usage cannot be renamed independently.
+Rename a Declaration to update all linked Usage labels. User-entered names remain intact when copied, including names ending in numbers or underscores. Generated fallback names are uniquified as `Link1`, `Link2`, and so forth.
 
-Copy a complete Declaration/Usage pair to remap the pair together. A data Usage copied alone can retain its Declaration in the same graph; pasting it into another graph leaves it unresolved. Execution Usage-only copies are deliberately unresolved. Do not use these nodes as cross-graph or cross-Blueprint variables.
+Copy a complete Declaration/Usage pair to duplicate the association. A data Usage copied alone can retain its Declaration in the same graph; pasting it into another graph leaves it unresolved. Execution Usage-only copies remain unresolved. These nodes do not provide cross-graph or cross-Blueprint variables.
 
 Deleting a required Declaration or leaving an invalid association produces a compile error. Undo can restore the association. Compile after editing and verify the affected behavior.
 
-## Compatibility and limits
+## Compatibility and known limits
 
-- Tested on Windows Unreal Engine 5.8.3; other engine versions and platforms are unverified.
-- Observed cases include Actor and Level Blueprint graphs/functions, widget function routing, and Animation Blueprint Event Graph routing. This does not imply support for every specialized Blueprint context.
-- Macros and AnimGraph pose graphs are excluded.
+See [Compatibility/BuildMatrix.md](Compatibility/BuildMatrix.md) for per-engine build and test evidence, and [docs/Validation.md](docs/Validation.md) for the feature checks.
+
+- The published packages target Windows x64. A successful package build proves compilation for that engine; it does not by itself prove every Blueprint context or node type works.
+- UE 5.9 is specifically **Preview 2**; this release does not claim compatibility with a later 5.9 preview or final release.
+- Macros, arbitrary Blueprint contexts, and all data types are not blanket-certified.
 - NBL pins do not offer **Split Struct Pin**. Use native producer/consumer split pins or Break/Make nodes around a whole typed link.
-- Tested values include Boolean, numeric, vector, rotator, and actor/Self references. Specific integer array/set and integer-to-string map mutation cases were verified. Arbitrary reference qualifiers, container element types, delegates, networking and other untested types are not blanket-supported.
-- Universal type support is a goal, not an exhaustive compatibility claim.
+- Arbitrary reference qualifiers, container element types, delegates, networking, and untested engine features may require additional validation.
+- Keep the plugin enabled while assets contain its nodes, including during cooking.
 
-## Packaging and removal
+Before disabling or removing the plugin, replace its connections with ordinary wires, remove its nodes, compile, and save the affected assets.
 
-Keep the plugin enabled while assets contain NBL nodes, including during cooking. Editor/uncooked modules perform the compile-time rewrite; packaged behavior has been tested in Windows Development and Shipping builds for the represented cases.
+## Support and issues
 
-Before disabling or removing the plugin, replace its connections with ordinary wires, remove its nodes, compile and save the affected assets. Disabling it while those assets still need its node classes is not a supported uninstall method.
+Use the **Support** button in Unreal’s plugin browser to open the [PayPal support page](https://www.paypal.com/donate/?hosted_button_id=RWT3F8XL7TTPE). For bugs and feature requests, use [GitHub Issues](https://github.com/frainkey1/NamedBlueprintLinks/issues). Include your engine version, plugin version, reproduction steps, expected and actual behavior, and relevant error text.
 
-## Support
+Maintenance and support are provided voluntarily as time permits. There are no guaranteed response times, fixes, future engine updates, or service levels.
 
-Report bugs and request improvements through [GitHub Issues](https://github.com/frainkey1/NamedBlueprintLinks/issues). Include your Unreal Engine version, plugin version, reproduction steps, expected and actual behavior, and relevant error text.
+## License and development
 
-## Troubleshooting
+The plugin is available under the [MIT License](LICENSE). Unreal Engine is a separate prerequisite governed by Epic’s terms; this repository does not distribute engine source or grant rights to Unreal Engine.
 
-For missing links, inspect the Declaration and Usage in the same graph and follow the compiler's named error. Restore the source, undo the deletion, or recreate the intended pair. Matching labels alone do not repair identity.
+On a machine with a C++17 compiler and Bash, run `bash Tests/run-local.sh` for the portable route-planner checks. This does not build Unreal or establish Linux support. Unreal automation tests use the `NamedBlueprintLinks` test prefix.
 
-When reporting a problem, include engine version, platform, exact error text, reproduction steps, and a small graph screenshot. Avoid sharing private project files unless requested through the publisher's support channel.
-
-Internal test fixture functions are hidden from normal Blueprint authoring. They belong to the uncooked test module and must not be used in game assets.
-
-## License and support policy
-
-The original plugin code is available under the [MIT License](https://github.com/frainkey1/NamedBlueprintLinks/blob/main/LICENSE). Unreal Engine is a separate prerequisite governed by Epic’s terms; this repository does not distribute engine source or grant rights to Unreal Engine.
-
-Maintenance and support are provided voluntarily as time permits. There are no guaranteed response times, fixes, future engine updates, or service levels. Contributions and reproducible issue reports are welcome. Review the MIT warranty and liability disclaimer.
-
-## Development checks
-
-On a machine with a C++17 compiler and Bash, run `bash Tests/run-local.sh` for the portable route-planner checks. This does not build Unreal or establish Linux support. On Windows with a matching Unreal build toolchain, `Scripts/BuildPlugin.ps1` builds the plugin; supply `-EngineRoot` for your local engine installation and a new `-OutputPath`. Unreal automation tests use the `NamedBlueprintLinks` test prefix.
-
-Developed with AI assistance; the UDU plugin icon is generated artwork.
+Developed with AI assistance; the plugin icon is generated artwork.

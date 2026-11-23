@@ -7,6 +7,6 @@ public class NamedBlueprintLinksEditor : ModuleRules
     {
         PCHUsage=PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "Slate", "SlateCore", "GraphEditor", "NamedBlueprintLinksNodes" });
-        PrivateDependencyModuleNames.AddRange(new[] { "UnrealEd", "BlueprintGraph", "Kismet" });
+        PrivateDependencyModuleNames.AddRange(new[] { "UnrealEd", "BlueprintGraph", "Kismet", "AnimGraph" });
     }
 }

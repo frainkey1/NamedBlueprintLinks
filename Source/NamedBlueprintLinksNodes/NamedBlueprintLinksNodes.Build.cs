@@ -9,6 +9,6 @@ public class NamedBlueprintLinksNodes : ModuleRules
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         CppStandard = CppStandardVersion.Cpp20;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "BlueprintGraph" });
-        PrivateDependencyModuleNames.AddRange(new[] { "UnrealEd", "KismetCompiler", "Kismet", "ToolMenus", "Slate", "SlateCore" });
+        PrivateDependencyModuleNames.AddRange(new[] { "UnrealEd", "KismetCompiler", "Kismet", "ToolMenus", "Slate", "SlateCore", "AnimGraph" });
     }
 }

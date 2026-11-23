@@ -68,6 +68,59 @@ bool FNBLCopyPairs::RunTest(const FString&)
     TestTrue(TEXT("Original pair untouched"),D->DeclarationId==Original && NBLLinkResolver::FindDeclaration(*U)==D);
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNBLCustomNameCopy, "NamedBlueprintLinks.Lifecycle.CopyPreservesCustomNames",
+    EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FNBLCustomNameCopy::RunTest(const FString&)
+{
+    NBLTests::FFixture F;
+    for (const FName CustomName : {FName(TEXT("Phase 2")), FName(TEXT("Phase_2"))})
+    {
+        auto* D=NBLTests::Add<UK2Node_NBLDataDeclaration>(F.Graph);
+        auto* U=D->CreateUsage();
+        FText Error;
+        TestTrue(TEXT("Custom declaration name can be assigned"),D->RenameLink(CustomName,Error));
+        const FGuid OriginalId=D->DeclarationId;
+        const FString Text=CopyLinks({D,U});
+        auto Pasted=PasteLinks(F.Graph,Text);
+        if (!TestEqual(TEXT("Custom pair imported"),Pasted.Num(),2)) return false;
+        UK2Node_NBLBase* NewD=nullptr;
+        for (auto* N : Pasted) if (N->IsDeclaration()) NewD=N;
+        if (!TestNotNull(TEXT("Copied declaration exists"),NewD)) return false;
+        TestEqual(TEXT("Custom declaration name remains exactly intact"),NewD->LinkName,CustomName);
+        TestTrue(TEXT("Copied custom declaration gets a fresh identity"),NewD->DeclarationId!=OriginalId);
+        for (auto* N : Pasted) if (!N->IsDeclaration())
+        {
+            TestEqual(TEXT("Custom usage name remains exactly intact"),N->LinkName,CustomName);
+            TestTrue(TEXT("Custom usage resolves to copied declaration"),NBLLinkResolver::FindDeclaration(*N)==NewD);
+        }
+    }
+    return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNBLDefaultCopyNames, "NamedBlueprintLinks.Lifecycle.CopyUsesCompactDefaultNames",
+    EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FNBLDefaultCopyNames::RunTest(const FString&)
+{
+    NBLTests::FFixture F;
+    auto* D=NBLTests::Add<UK2Node_NBLDataDeclaration>(F.Graph);
+    auto* U=D->CreateUsage();
+    const FString Text=CopyLinks({D,U});
+    for (int32 CopyIndex=1; CopyIndex<=2; ++CopyIndex)
+    {
+        auto Pasted=PasteLinks(F.Graph,Text);
+        if (!TestEqual(TEXT("Default pair imported"),Pasted.Num(),2)) return false;
+        UK2Node_NBLBase* NewD=nullptr;
+        for (auto* N : Pasted) if (N->IsDeclaration()) NewD=N;
+        if (!TestNotNull(TEXT("Copied declaration exists"),NewD)) return false;
+        const FName ExpectedName(*FString::Printf(TEXT("Link%d"),CopyIndex));
+        TestEqual(TEXT("Default name gets compact incrementing suffix"),NewD->LinkName,ExpectedName);
+        for (auto* N : Pasted) if (!N->IsDeclaration())
+        {
+            TestEqual(TEXT("Usage follows copied default name"),N->LinkName,ExpectedName);
+            TestTrue(TEXT("Usage resolves to copied declaration"),NBLLinkResolver::FindDeclaration(*N)==NewD);
+        }
+    }
+    return true;
+}
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNBLUndoPairs,"NamedBlueprintLinks.Lifecycle.UndoRedo",
     EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FNBLUndoPairs::RunTest(const FString&)

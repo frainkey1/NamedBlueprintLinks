@@ -48,7 +48,7 @@ bool UK2Node_NBLBase::RenameLink(FName NewName, FText& OutError)
             { OutError=FText::FromString(TEXT("That link name is already used in this graph and category.")); return false; }
     if (NewName==LinkName) return true;
     const FScopedTransaction Transaction(NSLOCTEXT("NamedBlueprintLinks","RenameLink","Rename Named Link"));
-    Modify(); LinkName=NewName; ClearCompilerMessage();
+    Modify(); LinkName=NewName; bUsesDefaultLinkName=false; ClearCompilerMessage();
     for (UEdGraphNode* GraphNode : GetGraph()->Nodes)
         if (auto* Usage=Cast<UK2Node_NBLBase>(GraphNode))
             if (!Usage->IsDeclaration() && Usage->TargetDeclarationId==DeclarationId)

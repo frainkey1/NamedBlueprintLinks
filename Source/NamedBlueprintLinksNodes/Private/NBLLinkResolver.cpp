@@ -2,6 +2,7 @@
 
 #include "NBLLinkResolver.h"
 #include "NBLRoutePlanner.h"
+#include "AnimationGraphSchema.h"
 #include "K2Node_NBLBase.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraphSchema_K2.h"
@@ -25,13 +26,23 @@ UK2Node_NBLBase* NBLLinkResolver::FindDeclaration(const UK2Node_NBLBase& Usage)
     return Result;
 }
 
-void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Context)
+namespace
+{
+bool IsAnimationPoseEndpoint(const UK2Node_NBLBase* Node)
+{
+    if (!Node || !Node->IsUniversalLink() || Node->IsExecutionLink()) return false;
+    for (const UEdGraphPin* Pin : Node->Pins)
+        if (Pin && UAnimationGraphSchema::IsPosePin(Pin->PinType)) return true;
+    return false;
+}
+
+void ExpandGraphInternal(UEdGraph& Graph, FCompilerResultsLog& MessageLog, UClass* CallingContext, bool bPoseEndpointsOnly)
 {
     // Expansion must operate on a compiler intermediate graph, never an asset graph.
     if (UBlueprint* BP = FBlueprintEditorUtils::FindBlueprintForGraph(&Graph))
         if (BP->UbergraphPages.Contains(&Graph) || BP->FunctionGraphs.Contains(&Graph) || BP->MacroGraphs.Contains(&Graph))
         {
-            Context.MessageLog.Error(TEXT("Named Blueprint Links refused to rewrite an asset graph; compiler hook needs review."));
+            MessageLog.Error(TEXT("Named Blueprint Links refused to rewrite an asset graph; compiler hook needs review."));
             return;
         }
     // Every endpoint invokes this graph-wide pass. On failure, retire ALL
@@ -41,7 +52,7 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
     TArray<UK2Node_NBLBase*> Nodes;
     for (UEdGraphNode* GraphNode : Graph.Nodes)
         if (auto* Node = Cast<UK2Node_NBLBase>(GraphNode))
-            if (!Node->bCompilerResolved) Nodes.Add(Node);
+            if (!Node->bCompilerResolved && (!bPoseEndpointsOnly || IsAnimationPoseEndpoint(Node))) Nodes.Add(Node);
     if (Nodes.IsEmpty()) return;
     bool bExpansionSucceeded = false;
     ON_SCOPE_EXIT
@@ -73,15 +84,15 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
         for (auto* Pin : GraphNode->Pins) PinId(Pin);
         if (auto* Node = Cast<UK2Node_NBLBase>(GraphNode))
         {
-            if (Node->bCompilerResolved) continue;
+            if (Node->bCompilerResolved || (bPoseEndpointsOnly && !IsAnimationPoseEndpoint(Node))) continue;
             if (Node->IsUniversalLink() && Node->IsDeclaration() && Node->IsExecutionLink() &&
                 Node->GetOutputPin() && !Node->GetOutputPin()->LinkedTo.IsEmpty())
             {
-                Context.MessageLog.Error(TEXT("Execution link @@ cannot use a local passthrough output. Use its single linked Usage."),Node);
+                MessageLog.Error(TEXT("Execution link @@ cannot use a local passthrough output. Use its single linked Usage."),Node);
                 return;
             }
             if (!(Node->IsDeclaration() ? Node->DeclarationId : Node->NodeGuid).IsValid())
-            { Context.MessageLog.Error(TEXT("Named Blueprint Links has an invalid endpoint identity at @@"), Node); return; }
+            { MessageLog.Error(TEXT("Named Blueprint Links has an invalid endpoint identity at @@"), Node); return; }
             const NBL::Kind Kind = Node->IsExecutionLink()
                 ? (Node->IsDeclaration() ? NBL::Kind::ExecDeclaration : NBL::Kind::ExecUsage)
                 : (Node->IsDeclaration() ? NBL::Kind::DataDeclaration : NBL::Kind::DataUsage);
@@ -98,7 +109,7 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
                 for (auto* Other : Pin->LinkedTo)
                 {
                     if (Other->GetOwningNode()->GetGraph() != &Graph)
-                    { Context.MessageLog.Error(TEXT("Named Blueprint Links rejects cross-graph wire at @@"), GraphNode); return; }
+                    { MessageLog.Error(TEXT("Named Blueprint Links rejects cross-graph wire at @@"), GraphNode); return; }
                     Snapshot.Edges.push_back({PinId(Pin),PinId(Other)});
                 }
     const NBL::Plan Plan = NBL::BuildPlan(Snapshot);
@@ -112,7 +123,7 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
         }
         const FString Message = FString::Printf(TEXT("%s for link '%s' at @@"),
             UTF8_TO_TCHAR(Plan.Error.c_str()), *Offender->LinkName.ToString());
-        Context.MessageLog.Error(*Message, Offender); return;
+        MessageLog.Error(*Message, Offender); return;
     }
     // Validate replacement types before touching the intermediate graph.
     const auto* Schema = GetDefault<UEdGraphSchema_K2>();
@@ -121,8 +132,8 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
         if (std::find(Snapshot.Edges.begin(),Snapshot.Edges.end(),Wire) != Snapshot.Edges.end()) continue;
         UEdGraphPin* Source = Pins[Wire.Source]; UEdGraphPin* Target = Pins[Wire.Destination];
         if (Source->Direction != EGPD_Output || Target->Direction != EGPD_Input ||
-            !Schema->ArePinTypesCompatible(Source->PinType,Target->PinType,Context.NewClass))
-        { Context.MessageLog.Error(TEXT("Named Blueprint Links cannot connect the source and consumer types at @@"), Target->GetOwningNode()); return; }
+            !Schema->ArePinTypesCompatible(Source->PinType,Target->PinType,CallingContext))
+        { MessageLog.Error(TEXT("Named Blueprint Links cannot connect the source and consumer types at @@"), Target->GetOwningNode()); return; }
     }
     for (auto* Node : Nodes) Node->BreakAllNodeLinks();
     for (const auto& Wire : Plan.Edges)
@@ -130,4 +141,22 @@ void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Conte
             Pins[Wire.Source]->MakeLinkTo(Pins[Wire.Destination]);
     for (auto* Node : Nodes) Node->bCompilerResolved = true;
     bExpansionSucceeded = true;
+}
+}
+
+void NBLLinkResolver::ExpandGraph(UEdGraph& Graph, FKismetCompilerContext& Context)
+{
+    // Expansion must operate on a compiler intermediate graph, never an asset graph.
+    if (UBlueprint* BP = FBlueprintEditorUtils::FindBlueprintForGraph(&Graph))
+        if (BP->UbergraphPages.Contains(&Graph) || BP->FunctionGraphs.Contains(&Graph) || BP->MacroGraphs.Contains(&Graph))
+        {
+            Context.MessageLog.Error(TEXT("Named Blueprint Links refused to rewrite an asset graph; compiler hook needs review."));
+            return;
+        }
+    ExpandGraphInternal(Graph, Context.MessageLog, Context.NewClass, false);
+}
+
+void NBLLinkResolver::ExpandAnimationGraph(UEdGraph& Graph, FCompilerResultsLog& MessageLog, UClass* CallingContext)
+{
+    ExpandGraphInternal(Graph, MessageLog, CallingContext, true);
 }

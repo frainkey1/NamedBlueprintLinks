@@ -1,14 +1,14 @@
 {
   "FileVersion": 3,
-  "Version": 3,
-  "VersionName": "0.1.0-beta.3",
+  "Version": 101,
+  "VersionName": "1.0.1",
   "FriendlyName": "Named Blueprint Links",
-  "Description": "Named Blueprint data and execution links. Beta; tested cases on Windows UE 5.8.3. See docs/Validation.md for scope.",
+  "Description": "Named Blueprint data and execution links with graph-aware duplication and AnimGraph pose-link pulse display. Windows x64 builds for Unreal Engine 5.0–5.8 and 5.9 Preview 2.",
   "Category": "Blueprint",
   "CreatedBy": "Frainkey",
   "CanContainContent": false,
   "EnabledByDefault": false,
-  "IsBetaVersion": true,
+  "IsBetaVersion": false,
   "Modules": [
     {
       "Name": "NamedBlueprintLinksNodes",
@@ -29,6 +29,5 @@
   ],
   "CreatedByURL": "https://github.com/frainkey1",
   "DocsURL": "https://github.com/frainkey1/NamedBlueprintLinks/blob/main/docs/UsageGuide.md",
-  "SupportURL": "https://github.com/frainkey1/NamedBlueprintLinks/issues",
-  "EngineVersion": "5.8.0"
+  "SupportURL": "https://www.paypal.com/donate/?hosted_button_id=RWT3F8XL7TTPE"
 }

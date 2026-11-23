@@ -33,11 +33,13 @@ void UK2Node_NBLBase::PostPasteNode()
         if (Declarations.Contains(Old)) Ambiguous.Add(Old);
         else Declarations.Add(Old,Link);
         Link->Modify(); Link->DeclarationId=FGuid::NewGuid();
-        const FString Base=Link->LinkName.ToString(); int32 Suffix=0;
+        if (Link->bUsesDefaultLinkName)
+        {
+            const FString Base=Link->IsUniversalLink() ? TEXT("Link") : TEXT("ExecLink"); int32 Suffix=0;
         bool Taken;
         do
         {
-            Link->LinkName=FName(*(Suffix==0 ? Base : FString::Printf(TEXT("%s_%d"),*Base,Suffix)));
+            Link->LinkName=FName(*(Suffix==0 ? Base : FString::Printf(TEXT("%s%d"),*Base,Suffix)));
             Taken=false;
             for (UEdGraphNode* N : GetGraph()->Nodes)
                 if (auto* Other=Cast<UK2Node_NBLBase>(N))
@@ -45,6 +47,7 @@ void UK2Node_NBLBase::PostPasteNode()
                     { Taken=true; break; }
             ++Suffix;
         } while (Taken);
+        }
     }
     TSet<FGuid> UsedExecDeclarations;
     for (auto* Link : Batch) if (!Link->IsDeclaration())
