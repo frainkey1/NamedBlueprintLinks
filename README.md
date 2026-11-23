@@ -6,7 +6,7 @@ Named Blueprint Links replaces long Blueprint connections with named Declaration
 
 ## What’s new in 1.0.1
 
-- AnimGraph pose connections display a white pulse when the link is stale.
+- When an Animation Blueprint is not up to date, its named AnimGraph pose connections receive a white animated overlay. This reflects the Blueprint compile status, not whether an individual link is broken or stale.
 - Event Graph execution connections retain Unreal’s native red/orange pulse.
 - Copying a complete Declaration/Usage pair creates fresh identity and remaps its Usages. Custom names, including names such as `Phase 2` and `Phase_2`, stay exactly as entered. Generated names use the compact sequence `Link`, `Link1`, `Link2`, and so on.
 - Win64 packages are provided for Unreal Engine 5.0–5.8 and Unreal Engine 5.9 Preview 2. The 5.9 build remains a Preview 2 build.
@@ -15,9 +15,9 @@ Named Blueprint Links replaces long Blueprint connections with named Declaration
 
 ### AnimGraph pose links
 
-![Animation Blueprint AnimGraph with white pose-link pulses and named arm groups](docs/images/animgraph_pose_links.png)
+![Animation Blueprint AnimGraph with a white overlay on named pose connections and named arm groups](docs/images/animgraph_pose_links.png)
 
-The white pulse marks pose-link flow through the AnimGraph.
+When the Animation Blueprint is not up to date, the white overlay animates along named pose connections. It indicates the Blueprint compile status, not individual link validity.
 
 ### Event Graph execution links
 

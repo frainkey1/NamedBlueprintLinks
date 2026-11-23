@@ -4,7 +4,7 @@
 
 The project is out of beta.
 
-- Added white stale pose-link pulses in Animation Blueprint AnimGraphs.
+- Added a white animated overlay on named pose connections while the Animation Blueprint is not up to date. The overlay reflects Blueprint compile status, not individual link validity.
 - Preserved Unreal’s native red/orange pulse display for Event Graph execution connections.
 - Improved full-pair duplication: copied links receive fresh identity and linked Usages remap to the new Declaration.
 - Preserved user-entered names during duplication, including numeric and underscore suffixes. Generated fallback names use compact `Link`, `Link1`, `Link2` naming.
