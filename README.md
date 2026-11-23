@@ -17,7 +17,7 @@ Named Blueprint Links replaces long Blueprint connections with named Declaration
 
 ![Animation Blueprint AnimGraph with a white overlay on named pose connections and named arm groups](docs/images/animgraph_pose_links.png)
 
-When the Animation Blueprint is not up to date, the white overlay animates along named pose connections. It indicates the Blueprint compile status, not individual link validity.
+Here, “not up to date” means the owning Animation Blueprint is compile-stale—for example, it has edits that need compiling. In that state, the pale line and white moving pulse appear on named pose connections. This indicates the whole Blueprint’s compile status; it does not mark each node or diagnose an individual stale, broken, or unresolved link. A link can have its own stale state independently.
 
 ### Event Graph execution links
 
